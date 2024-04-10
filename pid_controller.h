@@ -20,6 +20,10 @@ public:
     double P_cte = 0;
     double I_cte = 0;
     double D_cte = 0;
+    double _cte = 0;
+    double _diff_cte = 0;
+    double _prev_cte = 0;
+    double _int_cte = 0;
     /*
     * Coefficients
     */
