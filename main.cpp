@@ -1,4 +1,3 @@
-
 /**********************************************
  * Self-Driving Car Nano-degree - Udacity
  *  Created on: September 20, 2020
@@ -77,7 +76,16 @@ string hasData(string s) {
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
-
+double in_range_angle(double angle) {
+  
+        if(angle < -M_PI){ 
+          angle += 2 * M_PI;
+          }
+        if(angle > M_PI){
+          angle -= 2 * M_PI;
+          }
+    return angle;
+}
 double angle_between_points(double x1, double y1, double x2, double y2){
   return atan2(y2-y1, x2-x1);
 }
@@ -185,7 +193,7 @@ void path_planner(vector<double>& x_points, vector<double>& y_points, vector<dou
 
 }
 
-void set_obst(vector<double> x_points, vector<double> y_points, vector<State>& obstacles, bool& mrk_i){
+void set_obst(vector<double> x_points, vector<double> y_points, vector<State>& obstacles, bool& obst_flag){
 
 	for( int i = 0; i < x_points.size(); i++){
 		State obstacle;
@@ -193,37 +201,8 @@ void set_obst(vector<double> x_points, vector<double> y_points, vector<State>& o
 		obstacle.location.y = y_points[i];
 		obstacles.push_back(obstacle);
 	}
-	mrk_i = true;
+	obst_flag = true;
 }
-
-
-double normalize(double error_steer) {
-  while (error_steer < -M_PI) {
-    error_steer += 2 * M_PI;
-  }
-  while (error_steer > M_PI) {
-    error_steer -= 2 * M_PI;
-  }
-  return error_steer;
-}
-
-
-// 
-int closest_point(double x_position, double y_position, const vector<double>& x_pts, const vector<double>& y_pts) {
-    int closest_point_idx = 0;
-    double min_distance_squared = std::numeric_limits<double>::infinity();
-    for (int i = 0; i < x_pts.size(); i++) {
-        double dx = x_pts[i] - x_position;
-        double dy = y_pts[i] - y_position;
-        double distance_squared = dx * dx + dy * dy;
-        if (distance_squared < min_distance_squared) {
-            min_distance_squared = distance_squared;
-            closest_point_idx = i;
-        }
-    }
-    return closest_point_idx;
-}
-
 
 int main ()
 {
@@ -249,14 +228,16 @@ int main ()
   * TODO (Step 1): create pid (pid_steer) for steer command and initialize values
   **/
   PID pid_steer = PID();
-  pid_steer.Init(0.3, 0.0008, 0.4, 1.2, -1.2);
+  pid_steer.Init(0.5, 0.01, 0.01, 1.2, -1.2);
 
   // initialize pid throttle
   /**
   * TODO (Step 1): create pid (pid_throttle) for throttle command and initialize values
   **/
   PID pid_throttle = PID();
-  pid_throttle.Init(0.2, 0.00087, 0.12, 1.0, -1.0);
+  pid_throttle.Init(0.5, 0.01, 0.01, 1, -1);
+  // PID pid_steer = PID();
+  // PID pid_throttle = PID();
 
   h.onMessage([&pid_steer, &pid_throttle, &new_delta_time, &timer, &prev_timer, &i, &prev_timer](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode)
   {
@@ -323,23 +304,26 @@ int main ()
 
           // Compute steer error
           double error_steer;
-          
+
+
           double steer_output;
 
           /**
           * TODO (step 3): compute the steer error (error_steer) from the position and the desired trajectory
           **/
-          
-          // Find the index of the closest point to the current position
-          int closest_pt_idx = closest_point(x_position, y_position, x_points, y_points);
-
-          // Compute the angle between the current position and the closest point
-          double angle_desired = angle_between_points(x_position, y_position, x_points[closest_pt_idx], y_points[closest_pt_idx]);
-
-          // Compute the desired angle for steering by subtracting the current heading (yaw) from the angle between the current position and the closest point, and then normalize the result
-           error_steer = normalize(angle_desired - yaw);
-
-
+//           error_steer = 0;
+          int point_index = 0;
+          double min_distance = std::numeric_limits<double>::infinity();
+          for (int i = 0; i < x_points.size(); i++) {
+            double point_distance = (x_points[i] - x_position) * (x_points[i] - x_position) 
+                                      + (y_points[i] - y_position) * (y_points[i] - y_position);
+            if (point_distance < min_distance) {
+              min_distance = point_distance;
+              point_index = i;
+              }
+            }
+          double Desired_angle = atan2(y_points[point_index]-y_position, x_points[point_index]-x_position);
+          error_steer = in_range_angle(Desired_angle -yaw);
           /**
           * TODO (step 3): uncomment these lines
           **/
@@ -363,7 +347,7 @@ int main ()
           /**
           * TODO (step 2): uncomment these lines
           **/
-          // Update the delta time with the previous command
+//           // Update the delta time with the previous command
           pid_throttle.UpdateDeltaTime(new_delta_time);
 
           // Compute error of speed
@@ -372,7 +356,9 @@ int main ()
           * TODO (step 2): compute the throttle error (error_throttle) from the position and the desired speed
           **/
           // modify the following line for step 2
-          error_throttle = v_points[closest_pt_idx] - velocity;
+          // error_throttle = 0;
+
+          error_throttle = v_points[point_index] - velocity;
 
           double throttle_output;
           double brake_output;
@@ -380,11 +366,11 @@ int main ()
           /**
           * TODO (step 2): uncomment these lines
           **/
-//           // Compute control to apply
+          // Compute control to apply
           pid_throttle.UpdateError(error_throttle);
           double throttle = pid_throttle.TotalError();
 
-//           // Adapt the negative throttle to break
+          // Adapt the negative throttle to break
           if (throttle > 0.0) {
             throttle_output = throttle;
             brake_output = 0;
@@ -393,7 +379,7 @@ int main ()
             brake_output = -throttle;
           }
 
-//           // Save data
+          // Save data
           file_throttle.seekg(std::ios::beg);
           for(int j=0; j < i - 1; ++j){
               file_throttle.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
