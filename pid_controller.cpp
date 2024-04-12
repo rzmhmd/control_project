@@ -33,7 +33,11 @@ void PID::UpdateError(double cte) {
    * TODO: Update PID errors based on cte.
    **/
    _cte = cte;
-   _diff_cte = (_cte - _prev_cte) /dt;
+   if (dt == 0) {
+     _diff_cte=0.0;
+   } else {
+     _diff_cte = (_cte - _prev_cte) / dt;
+   }
    _prev_cte = _cte;
    _int_cte += _cte * dt;
 }
