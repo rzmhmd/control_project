@@ -89,6 +89,19 @@ double in_range_angle(double angle) {
 double angle_between_points(double x1, double y1, double x2, double y2){
   return atan2(y2-y1, x2-x1);
 }
+int point_finder(double x_position, double y_position, vector<double> x_points, vector<double> y_points) {
+    int point_index = 0;
+    double min_distance = std::numeric_limits<double>::infinity();
+    for (int i = 0; i < x_points.size(); i++) {
+      double point_distance = (x_points[i] - x_position) * (x_points[i] - x_position) 
+                              + (y_points[i] - y_position) * (y_points[i] - y_position);
+      if (point_distance < min_distance) {
+        min_distance = point_distance;
+        point_index = i;
+        }
+            }
+    return point_index;
+}
 
 BehaviorPlannerFSM behavior_planner(
       P_LOOKAHEAD_TIME, P_LOOKAHEAD_MIN, P_LOOKAHEAD_MAX, P_SPEED_LIMIT,
@@ -228,14 +241,14 @@ int main ()
   * TODO (Step 1): create pid (pid_steer) for steer command and initialize values
   **/
   PID pid_steer = PID();
-  pid_steer.Init(0.5, 0.01, 0.01, 1.2, -1.2);
+  pid_steer.Init(0.25, 0.1, 0.5, 1.2, -1.2);
 
   // initialize pid throttle
   /**
   * TODO (Step 1): create pid (pid_throttle) for throttle command and initialize values
   **/
   PID pid_throttle = PID();
-  pid_throttle.Init(0.5, 0.01, 0.01, 1, -1);
+  pid_throttle.Init(0.25, 0.05, 0.1, 1, -1);
   // PID pid_steer = PID();
   // PID pid_throttle = PID();
 
@@ -311,17 +324,10 @@ int main ()
           /**
           * TODO (step 3): compute the steer error (error_steer) from the position and the desired trajectory
           **/
-//           error_steer = 0;
-          int point_index = 0;
-          double min_distance = std::numeric_limits<double>::infinity();
-          for (int i = 0; i < x_points.size(); i++) {
-            double point_distance = (x_points[i] - x_position) * (x_points[i] - x_position) 
-                                      + (y_points[i] - y_position) * (y_points[i] - y_position);
-            if (point_distance < min_distance) {
-              min_distance = point_distance;
-              point_index = i;
-              }
-            }
+//           error_steer = 0;   
+          int point_index = point_finder(x_position,y_position,x_points,y_points);
+          // 0;
+          
           double Desired_angle = atan2(y_points[point_index]-y_position, x_points[point_index]-x_position);
           error_steer = in_range_angle(Desired_angle -yaw);
           /**
