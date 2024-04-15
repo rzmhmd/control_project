@@ -93,8 +93,8 @@ int point_finder(double x_position, double y_position, vector<double> x_points, 
     int point_index = 0;
     double min_distance = std::numeric_limits<double>::infinity();
     for (int i = 0; i < x_points.size(); i++) {
-      double point_distance = (x_points[i] - x_position) * (x_points[i] - x_position) 
-                              + (y_points[i] - y_position) * (y_points[i] - y_position);
+      double point_distance = sqrt((x_points[i] - x_position) * (x_points[i] - x_position) 
+                              + (y_points[i] - y_position) * (y_points[i] - y_position));
       if (point_distance < min_distance) {
         min_distance = point_distance;
         point_index = i;
