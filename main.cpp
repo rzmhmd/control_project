@@ -261,17 +261,17 @@ int main ()
   **/
   PID pid_throttle = PID();
   pid_throttle.Init(0.2, 0.0008, 0.1, 1, -1);
-  // pid_throttle.Init(0.01, 0.01, 0.01, 1.2, -1.2);
-  // pid_throttle.Init(0.05, 0.01, 0.01, 1.2, -1.2);
-  // pid_throttle.Init(0.2, 0.01, 0.01, 1.2, -1.2);
-  // pid_throttle.Init(0.2, 0.005, 0.01, 1.2, -1.2);
-  // pid_throttle.Init(0.2, 0.0025, 0.01, 1.2, -1.2);
-  // pid_throttle.Init(0.2, 0.001, 0.01, 1.2, -1.2);
-  // pid_throttle.Init(0.2, 0.001, 0.05, 1.2, -1.2);
-  // pid_throttle.Init(0.2, 0.001, 0.01, 1.2, -1.2);
-  // pid_throttle.Init(0.2, 0.001, 0.1, 1.2, -1.2);
-  // pid_throttle.Init(0.2, 0.001, 0.25, 1.2, -1.2);
-  // pid_throttle.Init(0.2, 0.001, 0.5, 1.2, -1.2);
+  // pid_throttle.Init(0.01, 0.01, 0.01, 1, -1);
+  // pid_throttle.Init(0.05, 0.01, 0.01, 1, -1);
+  // pid_throttle.Init(0.2, 0.01, 0.01, 1, -1);
+  // pid_throttle.Init(0.2, 0.005, 0.01, 1, -1);
+  // pid_throttle.Init(0.2, 0.0025, 0.01, 1, -1);
+  // pid_throttle.Init(0.2, 0.001, 0.01, 1, -1);
+  // pid_throttle.Init(0.2, 0.001, 0.05, 1, -1);
+  // pid_throttle.Init(0.2, 0.001, 0.01, 1, -1);
+  // pid_throttle.Init(0.2, 0.001, 0.1, 1, -1);
+  // pid_throttle.Init(0.2, 0.001, 0.25, 1, -1);
+  // pid_throttle.Init(0.2, 0.001, 0.5, 1, -1);
   // PID pid_steer = PID();
   // PID pid_throttle = PID();
 
